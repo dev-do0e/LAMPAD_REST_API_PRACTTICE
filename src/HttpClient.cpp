@@ -1,0 +1,84 @@
+#include "../include/HttpClient.h"
+
+#include <curl/curl.h>
+#include <iostream>
+
+HttpClient::HttpClient() {
+    curl_global_init(CURL_GLOBAL_ALL);
+}
+
+HttpClient::~HttpClient() {
+    curl_global_cleanup();
+}
+
+size_t HttpClient::writeCallback(void* contents, size_t size, size_t nmemb, void* userp) {
+    auto* buffer = static_cast<std::string*>(userp);
+    buffer->append(static_cast<const char*>(contents), size * nmemb);
+    return size * nmemb;
+}
+
+std::string HttpClient::get(const std::string& url) {
+    CURL* curl = curl_easy_init();
+    std::string response;
+
+    if (!curl) {
+        std::cerr << "[HttpClient] curl_easy_init() failed" << std::endl;
+        return "";
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPGET, 1L);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookie.jar");
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookie.jar");
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "[HttpClient] GET request failed: "
+                  << curl_easy_strerror(res) << std::endl;
+    }
+
+    curl_easy_cleanup(curl);
+
+    return response;
+}
+
+std::string HttpClient::post(const std::string& url,
+                             const std::string& body,
+                             const std::vector<std::string>& headersVec) {
+    CURL* curl = curl_easy_init();
+    std::string response;
+
+    if (!curl) {
+        std::cerr << "[HttpClient] curl_easy_init() failed" << std::endl;
+        return "";
+    }
+
+    struct curl_slist* headers = nullptr;
+    for (const auto& header : headersVec) {
+        headers = curl_slist_append(headers, header.c_str());
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_POST, 1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, "cookie.jar"); // 요청 시 쿠키 읽어옴
+    curl_easy_setopt(curl, CURLOPT_COOKIEJAR, "cookie.jar");  // 응답 받은 쿠키 저장
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "[HttpClient] POST request failed: "
+                  << curl_easy_strerror(res) << std::endl;
+    }
+
+    curl_slist_free_all(headers);
+    curl_easy_cleanup(curl);
+
+    return response;
+}

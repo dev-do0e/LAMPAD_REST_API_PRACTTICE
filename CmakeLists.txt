@@ -1,0 +1,19 @@
+cmake_minimum_required(VERSION 3.15)
+project(LAMPAD_REST_API_PRACTICE)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# 헤더/라이브러리 경로 수동 등록
+include_directories("D:/vcpkg/installed/x64-windows/include")
+link_directories("D:/vcpkg/installed/x64-windows/lib")
+
+# 실행 파일
+add_executable(LAMPAD_REST_API_PRACTICE
+    src/main.cpp
+    src/HttpClient.cpp
+    src/Manager.cpp
+)
+
+# 정적 라이브러리 연결 (libcurl.lib)
+target_link_libraries(LAMPAD_REST_API_PRACTICE PRIVATE libcurl)
