@@ -10,7 +10,7 @@ public:
 
     std::string post(const std::string& url,
                      const std::string& body,
-                     const std::vector<std::string>& headersVec);
+                     const std::string& header);
 
     std::string get(const std::string& url);
 

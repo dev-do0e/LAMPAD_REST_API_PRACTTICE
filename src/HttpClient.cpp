@@ -47,7 +47,7 @@ std::string HttpClient::get(const std::string& url) {
 
 std::string HttpClient::post(const std::string& url,
                              const std::string& body,
-                             const std::vector<std::string>& headersVec) {
+                             const std::string& header) {
     CURL* curl = curl_easy_init();
     std::string response;
 
@@ -56,15 +56,12 @@ std::string HttpClient::post(const std::string& url,
         return "";
     }
 
-    struct curl_slist* headers = nullptr;
-    for (const auto& header : headersVec) {
-        headers = curl_slist_append(headers, header.c_str());
-    }
+    struct curl_slist* slist = curl_slist_append(nullptr, header.c_str());
 
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_POST, 1L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body.c_str());
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, slist);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writeCallback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
@@ -77,7 +74,7 @@ std::string HttpClient::post(const std::string& url,
                   << curl_easy_strerror(res) << std::endl;
     }
 
-    curl_slist_free_all(headers);
+    curl_slist_free_all(slist);
     curl_easy_cleanup(curl);
 
     return response;
