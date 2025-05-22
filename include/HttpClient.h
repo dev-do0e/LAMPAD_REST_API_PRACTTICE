@@ -9,8 +9,8 @@ public:
     ~HttpClient();
 
     std::string post(const std::string& url,
-                     const std::string& body,
-                     const std::string& header);
+                     const std::string& header,
+                     const std::string& body);
 
     std::string get(const std::string& url);
 

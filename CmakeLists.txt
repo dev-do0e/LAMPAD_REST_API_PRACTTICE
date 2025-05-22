@@ -12,7 +12,8 @@ link_directories("D:/vcpkg/installed/x64-windows/lib")
 add_executable(LAMPAD_REST_API_PRACTICE
     src/main.cpp
     src/HttpClient.cpp
-    src/Manager.cpp
+    src/LampadApiClient.cpp
+    src/LampadRestApiPractice.cpp
 )
 
 # 정적 라이브러리 연결 (libcurl.lib)

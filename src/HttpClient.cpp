@@ -2,6 +2,9 @@
 
 #include <curl/curl.h>
 #include <iostream>
+#include <mutex>
+
+static std::mutex curlCookieMutex; // 전역 mutex
 
 HttpClient::HttpClient() {
     curl_global_init(CURL_GLOBAL_ALL);
@@ -18,6 +21,8 @@ size_t HttpClient::writeCallback(void* contents, size_t size, size_t nmemb, void
 }
 
 std::string HttpClient::get(const std::string& url) {
+    std::lock_guard<std::mutex> lock(curlCookieMutex); // 동기화
+
     CURL* curl = curl_easy_init();
     std::string response;
 
@@ -46,8 +51,10 @@ std::string HttpClient::get(const std::string& url) {
 }
 
 std::string HttpClient::post(const std::string& url,
-                             const std::string& body,
-                             const std::string& header) {
+                             const std::string& header,
+                             const std::string& body) {
+    std::lock_guard<std::mutex> lock(curlCookieMutex); // 동기화
+
     CURL* curl = curl_easy_init();
     std::string response;
 
