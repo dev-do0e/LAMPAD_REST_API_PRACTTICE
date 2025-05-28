@@ -1,5 +1,12 @@
 #pragma once
+
+#include "../include/LampadApiClient.h"
+
+#include <vector>
 #include <string>
+
+void analyzeBps_thread(const std::vector<LampadApiClient::Feed>* feeds, const std::string* url);
+void analyzePps_thread(const std::vector<LampadApiClient::Feed>* feeds, const std::string* url);
 
 class LampadRestApiPractice {
     public:
